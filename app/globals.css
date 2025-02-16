@@ -1,3 +1,103 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dvd-bounce-1 {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(calc(100vw - 160px), calc(70vh - 160px));
+  }
+  40% {
+    transform: translate(calc(30vw - 160px), calc(100vh - 160px));
+  }
+  60% {
+    transform: translate(0, calc(40vh - 160px));
+  }
+  80% {
+    transform: translate(calc(100vw - 160px), 0);
+  }
+}
+
+@keyframes dvd-bounce-2 {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(calc(100vw - 128px), calc(100vh - 128px));
+  }
+  40% {
+    transform: translate(0, calc(30vh - 128px));
+  }
+  60% {
+    transform: translate(calc(70vw - 128px), calc(100vh - 128px));
+  }
+  80% {
+    transform: translate(calc(100vw - 128px), 0);
+  }
+}
+
+@keyframes dvd-bounce-3 {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(calc(100vw - 112px), calc(100vh - 112px));
+  }
+  40% {
+    transform: translate(0, calc(30vh - 112px));
+  }
+  60% {
+    transform: translate(calc(70vw - 112px), calc(100vh - 112px));
+  }
+  80% {
+    transform: translate(calc(100vw - 112px), 0);
+  }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fade-in-delayed {
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out forwards;
+  animation-delay: 0.2s;
+}
+
+.animate-bounce-1 {
+  animation: dvd-bounce-1 20s linear infinite;
+}
+
+.animate-bounce-2 {
+  animation: dvd-bounce-2 50s linear infinite;
+}
+
+.animate-bounce-3 {
+  animation: dvd-bounce-3 55s linear infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 3s ease-in-out infinite;
+} 
