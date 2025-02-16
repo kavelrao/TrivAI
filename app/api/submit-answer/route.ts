@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 import Pusher from "pusher"
 import { lobbyPlayers } from "../get-players/route"  // Import the players list
+import { getQuestions } from "../start-game/route"  // Import the questions getter
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
@@ -24,6 +25,7 @@ const globalForGameState = global as typeof globalThis & {
     players: Set<string>; // Track all players in the game
     readyForNextQuestion: Record<number, Set<string>>; // Track players ready for next question
     showingAnswer: boolean; // Whether we're showing the answer screen
+    pendingCorrectAnswers: Record<number, Record<string, boolean>>; // Track correct answers until all players submit
   }>
 }
 
@@ -47,7 +49,8 @@ export async function POST(req: NextRequest) {
       answeredPlayers: { 0: new Set() },
       players: new Set(),
       readyForNextQuestion: { 0: new Set() },
-      showingAnswer: false
+      showingAnswer: false,
+      pendingCorrectAnswers: { 0: {} }
     }
   }
 
@@ -76,6 +79,9 @@ export async function POST(req: NextRequest) {
   if (!gameState.scores) {
     gameState.scores = {}
   }
+  if (!gameState.pendingCorrectAnswers) {
+    gameState.pendingCorrectAnswers = {}
+  }
   if (typeof gameState.currentQuestion !== 'number') {
     gameState.currentQuestion = 0
   }
@@ -86,6 +92,9 @@ export async function POST(req: NextRequest) {
   }
   if (!gameState.readyForNextQuestion[gameState.currentQuestion]) {
     gameState.readyForNextQuestion[gameState.currentQuestion] = new Set()
+  }
+  if (!gameState.pendingCorrectAnswers[gameState.currentQuestion]) {
+    gameState.pendingCorrectAnswers[gameState.currentQuestion] = {}
   }
 
   // If player has already answered current question, ignore
@@ -127,10 +136,8 @@ export async function POST(req: NextRequest) {
       throw new Error("Failed to check answer with OpenAI")
     }
 
-    // Update player's score
-    if (isCorrect) {
-      gameState.scores[playerName] = (gameState.scores[playerName] || 0) + 1
-    }
+    // Store whether the answer was correct in pending answers
+    gameState.pendingCorrectAnswers[gameState.currentQuestion][playerName] = isCorrect
 
     // Mark player as having answered the current question
     gameState.answeredPlayers[gameState.currentQuestion].add(playerName)
@@ -139,9 +146,8 @@ export async function POST(req: NextRequest) {
     const totalPlayers = gameState.players.size
     const currentAnsweredPlayers = gameState.answeredPlayers[gameState.currentQuestion]
 
-    // Update scores immediately for all clients
-    await pusher.trigger(`game-${lobbyCode}`, "score-update", {
-      scores: gameState.scores,
+    // Notify clients about a new answer submission (without score update)
+    await pusher.trigger(`game-${lobbyCode}`, "answer-submitted", {
       playerName, // Include who just answered
       currentQuestion: gameState.currentQuestion,
       totalAnswered: currentAnsweredPlayers.size,
@@ -150,13 +156,34 @@ export async function POST(req: NextRequest) {
 
     // If all players have answered the current question
     if (currentAnsweredPlayers.size === totalPlayers) {
-      gameState.showingAnswer = true
-      // Send event to show answer screen
-      await pusher.trigger(`game-${lobbyCode}`, "show-answer", {
-        scores: gameState.scores,
-        correctAnswer,
-        question
-      })
+      // Update all players' scores
+      for (const [player, isCorrect] of Object.entries(gameState.pendingCorrectAnswers[gameState.currentQuestion])) {
+        if (isCorrect) {
+          gameState.scores[player] = (gameState.scores[player] || 0) + 1
+        }
+      }
+
+      // Get questions to check if this is the last question
+      const questions = getQuestions(lobbyCode) || []
+      const isLastQuestion = gameState.currentQuestion >= questions.length - 1
+
+      if (isLastQuestion) {
+        // If this is the last question, trigger game over
+        await pusher.trigger(`game-${lobbyCode}`, "game-over", {
+          scores: gameState.scores,
+          correctAnswer,
+          question,
+          finalAnswers: gameState.pendingCorrectAnswers[gameState.currentQuestion]
+        })
+      } else {
+        gameState.showingAnswer = true
+        // Send event to show answer screen with updated scores
+        await pusher.trigger(`game-${lobbyCode}`, "show-answer", {
+          scores: gameState.scores,
+          correctAnswer,
+          question
+        })
+      }
     }
 
     return NextResponse.json({ 

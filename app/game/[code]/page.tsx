@@ -41,14 +41,12 @@ export default function Game({ params }: { params: { code: string } }) {
 
     const channel = pusher.subscribe(`game-${params.code}`)
     
-    channel.bind("score-update", (data: { 
-      scores: Record<string, number>;
+    channel.bind("answer-submitted", (data: { 
       playerName: string;
       currentQuestion: number;
       totalAnswered: number;
       totalPlayers: number;
     }) => {
-      setScores(prevScores => ({...data.scores}))
       setTotalAnswered(data.totalAnswered)
       setTotalPlayers(data.totalPlayers)
       if (data.playerName === playerName) {
@@ -70,6 +68,20 @@ export default function Game({ params }: { params: { code: string } }) {
       setReadyCount(0)
     })
 
+    channel.bind("game-over", (data: { 
+      scores: Record<string, number>;
+      correctAnswer: string;
+      question: string;
+      finalAnswers: Record<string, boolean>;
+    }) => {
+      setScores(prevScores => ({...data.scores}))
+      setGameOver(true)
+      setShowingAnswer(false)
+      setWaitingForOthers(false)
+      setCorrectAnswer(data.correctAnswer)
+      setCurrentQuestionText(data.question)
+    })
+
     channel.bind("next-question", (data: { questionNumber: number; scores: Record<string, number> }) => {
       setCurrentQuestion(data.questionNumber)
       setScores(prevScores => ({...data.scores}))
@@ -79,10 +91,6 @@ export default function Game({ params }: { params: { code: string } }) {
       setTotalAnswered(0)
       setReadyForNext(false)
       setReadyCount(0)
-    })
-
-    channel.bind("game-over", () => {
-      setGameOver(true)
     })
 
     return () => {
@@ -156,6 +164,15 @@ export default function Game({ params }: { params: { code: string } }) {
           Playing as: <span className="font-bold">{playerName}</span>
         </div>
         <h1 className="text-4xl font-bold mb-8">Game Over!</h1>
+        {currentQuestionText && (
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-bold mb-4">Final Question:</h2>
+            <p className="text-xl mb-4">{currentQuestionText}</p>
+            <p className="text-2xl mb-4">
+              Correct Answer: <span className="font-bold text-green-600">{correctAnswer}</span>
+            </p>
+          </div>
+        )}
         <p className="text-2xl mb-4">Final Scores:</p>
         {Object.entries(scores).map(([player, score]) => (
           <p key={player} className="text-xl mb-2">

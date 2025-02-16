@@ -3,7 +3,7 @@ import Pusher from "pusher"
 import { getTopics } from "../add-topic/route"
 import OpenAI from "openai"
 
-const QUESTIONS_PER_GAME = 5
+export const QUESTIONS_PER_GAME = 3
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
