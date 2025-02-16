@@ -118,20 +118,32 @@ export default function Lobby({ params }: { params: { code: string } }) {
           value={newTopic}
           onChange={(e) => setNewTopic(e.target.value)}
           placeholder="Enter a topic"
-          className="border-2 border-gray-300 rounded-md p-2 mr-2"
+          className="border-2 border-gray-300 rounded-[1rem] p-3 mr-4 w-64 text-center focus:outline-none focus:border-purple-500"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               addTopic()
             }
           }}
         />
-        <button onClick={addTopic} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Add Topic
+        <button onClick={addTopic} className="group transition-all">
+          <div className="bg-purple-500 rounded-[2rem] p-1">
+            <div className="px-10 py-4 rounded-[calc(2rem-2px)] bg-white hover:bg-opacity-0 transition-all">
+              <span className="text-xl font-bold text-purple-500 group-hover:text-white transition-all">
+                Add Topic
+              </span>
+            </div>
+          </div>
         </button>
       </div>
       {allPlayers.length === 2 && topics.length >= 2 && (
-        <button onClick={startGame} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          Start Game
+        <button onClick={startGame} className="group transition-all">
+          <div className="bg-purple-500 rounded-[2rem] p-1">
+            <div className="px-10 py-4 rounded-[calc(2rem-2px)] bg-white hover:bg-opacity-0 transition-all">
+              <span className="text-xl font-bold text-purple-500 group-hover:text-white transition-all">
+                Start Game
+              </span>
+            </div>
+          </div>
         </button>
       )}
     </div>

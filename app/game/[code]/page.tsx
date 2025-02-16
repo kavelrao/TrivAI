@@ -181,9 +181,15 @@ export default function Game({ params }: { params: { code: string } }) {
         ))}
         <button
           onClick={() => router.push("/")}
-          className="mt-8 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="group transition-all"
         >
-          Play Again
+          <div className="bg-purple-500 rounded-[2rem] p-1">
+            <div className="px-10 py-4 rounded-[calc(2rem-2px)] bg-white hover:bg-opacity-0 transition-all">
+              <span className="text-xl font-bold text-purple-500 group-hover:text-white transition-all">
+                Play Again
+              </span>
+            </div>
+          </div>
         </button>
       </div>
     )
@@ -211,9 +217,15 @@ export default function Game({ params }: { params: { code: string } }) {
           <button
             onClick={markReadyForNext}
             disabled={readyForNext}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+            className="group transition-all disabled:opacity-50"
           >
-            Ready for Next Question
+            <div className="bg-purple-500 rounded-[2rem] p-1">
+              <div className="px-10 py-4 rounded-[calc(2rem-2px)] bg-white hover:bg-opacity-0 transition-all">
+                <span className="text-xl font-bold text-purple-500 group-hover:text-white transition-all">
+                  Ready for Next Question
+                </span>
+              </div>
+            </div>
           </button>
         </div>
         <div>
@@ -249,7 +261,7 @@ export default function Game({ params }: { params: { code: string } }) {
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="Your answer"
-                className="border-2 border-gray-300 rounded-md p-2"
+                className="border-2 border-gray-300 rounded-[1rem] p-3 w-64 text-center focus:outline-none focus:border-purple-500"
                 disabled={waitingForOthers}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && answer) {
@@ -260,9 +272,15 @@ export default function Game({ params }: { params: { code: string } }) {
               <button
                 onClick={submitAnswer}
                 disabled={!answer || waitingForOthers}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+                className="group transition-all disabled:opacity-50"
               >
-                Submit Answer
+                <div className="bg-purple-500 rounded-[2rem] p-1">
+                  <div className="px-10 py-4 rounded-[calc(2rem-2px)] bg-white hover:bg-opacity-0 transition-all">
+                    <span className="text-xl font-bold text-purple-500 group-hover:text-white transition-all">
+                      Submit Answer
+                    </span>
+                  </div>
+                </div>
               </button>
             </div>
           )}

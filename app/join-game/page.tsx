@@ -28,21 +28,27 @@ export default function JoinGame() {
         value={playerName}
         onChange={(e) => setPlayerName(e.target.value)}
         placeholder="Enter your name"
-        className="border-2 border-gray-300 rounded-md p-2 mb-4"
+        className="border-2 border-gray-300 rounded-[1rem] p-3 mb-4 w-64 text-center focus:outline-none focus:border-purple-500"
       />
       <input
         type="text"
         value={lobbyCode}
         onChange={(e) => setLobbyCode(e.target.value)}
         placeholder="Enter lobby code"
-        className="border-2 border-gray-300 rounded-md p-2 mb-4"
+        className="border-2 border-gray-300 rounded-[1rem] p-3 mb-4 w-64 text-center focus:outline-none focus:border-purple-500"
       />
       <button 
         onClick={joinGame} 
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        className="group transition-all"
         disabled={!lobbyCode || !playerName}
       >
-        Join Game
+        <div className="bg-purple-500 rounded-[2rem] p-1">
+          <div className="px-10 py-4 rounded-[calc(2rem-2px)] bg-white hover:bg-opacity-0 transition-all">
+            <span className="text-xl font-bold text-purple-500 group-hover:text-white transition-all">
+              Join Game
+            </span>
+          </div>
+        </div>
       </button>
     </div>
   )

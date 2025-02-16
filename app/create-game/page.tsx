@@ -33,7 +33,7 @@ export default function CreateGame() {
         value={playerName}
         onChange={(e) => setPlayerName(e.target.value)}
         placeholder="Enter your name"
-        className="border-2 border-gray-300 rounded-md p-2 mb-4"
+        className="border-2 border-gray-300 rounded-[1rem] p-3 mb-4 w-64 text-center focus:outline-none focus:border-purple-500"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && playerName) {
             createGame()
@@ -42,10 +42,16 @@ export default function CreateGame() {
       />
       <button
         onClick={createGame}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        className="group transition-all"
         disabled={!playerName || isCreating}
       >
-        {isCreating ? "Creating..." : "Create Game"}
+        <div className="bg-purple-500 rounded-[2rem] p-1">
+          <div className="px-10 py-4 rounded-[calc(2rem-2px)] bg-white hover:bg-opacity-0 transition-all">
+            <span className="text-xl font-bold text-purple-500 group-hover:text-white transition-all">
+              {isCreating ? "Creating..." : "Create Game"}
+            </span>
+          </div>
+        </div>
       </button>
     </div>
   )
