@@ -1,63 +1,106 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Pusher from "pusher-js"
 
 export default function Lobby({ params }: { params: { code: string } }) {
   const [topics, setTopics] = useState<string[]>([])
   const [newTopic, setNewTopic] = useState("")
-  const [players, setPlayers] = useState<string[]>([])
+  const [otherPlayers, setOtherPlayers] = useState<string[]>([])
+  const searchParams = useSearchParams()
+  const playerName = searchParams.get("playerName") || "Unknown Player"
   const router = useRouter()
 
   useEffect(() => {
+    // Fetch initial player list and topics
+    const fetchInitialData = async () => {
+      const [playersResponse, topicsResponse] = await Promise.all([
+        fetch(`/api/get-players?lobbyCode=${params.code}`),
+        fetch(`/api/get-topics?lobbyCode=${params.code}`)
+      ])
+      
+      const playersData = await playersResponse.json()
+      const topicsData = await topicsResponse.json()
+
+      // Filter out the current player from the fetched list
+      setOtherPlayers(playersData.players.filter(p => p !== playerName))
+      setTopics(topicsData.topics || [])
+    }
+    fetchInitialData()
+
     const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
       cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
     })
 
     const channel = pusher.subscribe(`lobby-${params.code}`)
     channel.bind("player-joined", (data: { player: string }) => {
-      setPlayers((prevPlayers) => [...prevPlayers, data.player])
+      if (data.player !== playerName) {
+        setOtherPlayers(prev => [...prev, data.player])
+      }
     })
     channel.bind("topic-added", (data: { topic: string }) => {
       setTopics((prevTopics) => [...prevTopics, data.topic])
     })
     channel.bind("game-started", () => {
-      router.push(`/game/${params.code}`)
+      router.push(`/game/${params.code}?playerName=${encodeURIComponent(playerName)}`)
     })
 
     return () => {
       pusher.unsubscribe(`lobby-${params.code}`)
     }
-  }, [params.code, router])
+  }, [params.code, router, playerName])
 
   const addTopic = async () => {
     if (newTopic && topics.length < 4) {
-      await fetch("/api/add-topic", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lobbyCode: params.code, topic: newTopic }),
-      })
+      try {
+        const response = await fetch("/api/add-topic", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lobbyCode: params.code, topic: newTopic }),
+        })
+        if (!response.ok) {
+          console.error("Failed to add topic:", await response.json())
+        }
+      } catch (error) {
+        console.error("Error adding topic:", error)
+      }
       setNewTopic("")
     }
   }
 
   const startGame = async () => {
-    await fetch("/api/start-game", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lobbyCode: params.code }),
-    })
+    try {
+      const response = await fetch("/api/start-game", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lobbyCode: params.code }),
+      })
+      if (!response.ok) {
+        const data = await response.json()
+        console.error("Failed to start game:", data.error)
+      }
+    } catch (error) {
+      console.error("Error starting game:", error)
+    }
   }
+
+  // Combine current player with other players for display
+  const allPlayers = [playerName, ...otherPlayers]
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
+      <div className="absolute top-4 right-4 text-gray-600">
+        Playing as: <span className="font-bold">{playerName}</span>
+      </div>
       <h1 className="text-4xl font-bold mb-8">Lobby: {params.code}</h1>
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-4">Players:</h2>
         <ul>
-          {players.map((player, index) => (
-            <li key={index}>{player}</li>
+          {allPlayers.map((player, index) => (
+            <li key={index} className={player === playerName ? "font-bold" : ""}>
+              {player} {player === playerName ? "(you)" : ""}
+            </li>
           ))}
         </ul>
       </div>
@@ -76,12 +119,17 @@ export default function Lobby({ params }: { params: { code: string } }) {
           onChange={(e) => setNewTopic(e.target.value)}
           placeholder="Enter a topic"
           className="border-2 border-gray-300 rounded-md p-2 mr-2"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              addTopic()
+            }
+          }}
         />
         <button onClick={addTopic} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
           Add Topic
         </button>
       </div>
-      {players.length === 2 && topics.length >= 2 && (
+      {allPlayers.length === 2 && topics.length >= 2 && (
         <button onClick={startGame} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
           Start Game
         </button>

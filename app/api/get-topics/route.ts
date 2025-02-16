@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getQuestions } from "../start-game/route"
+import { getTopics } from "../add-topic/route"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -9,9 +9,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing lobby code" }, { status: 400 })
   }
 
-  const questions = getQuestions(lobbyCode)
-  console.log("GET questions for lobby:", lobbyCode, "Questions:", questions)
-  return NextResponse.json(questions)
-}
-
-
+  const topics = getTopics(lobbyCode)
+  return NextResponse.json({ topics })
+} 
