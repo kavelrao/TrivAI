@@ -5,7 +5,7 @@ import { generateText } from "ai"
 export async function POST(req: NextRequest) {
   const { topics } = await req.json()
 
-  const prompt = `Generate 10 trivia questions and answers based on the following topics: ${topics.join(", ")}. Format the output as a JSON array of objects, each with 'question' and 'answer' properties.`
+  const prompt = `Generate 10 trivia questions and answers based on the following topics: ${topics.join(", ")}. Format the output as a JSON array of objects, each with 'question' and 'answer' properties. Do NOT create any question where the topic is the answer.`
 
   try {
     const { text } = await generateText({

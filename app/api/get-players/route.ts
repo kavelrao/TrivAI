@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 
 // In a real app, this would be stored in a database
-const lobbyPlayers: Record<string, string[]> = {}
+export const lobbyPlayers: Record<string, string[]> = {}
 
 export function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)

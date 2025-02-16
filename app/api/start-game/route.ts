@@ -3,6 +3,8 @@ import Pusher from "pusher"
 import { getTopics } from "../add-topic/route"
 import OpenAI from "openai"
 
+const QUESTIONS_PER_GAME = 5
+
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
   key: process.env.PUSHER_KEY!,
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are a trivia question generator. You must ALWAYS respond with a valid JSON array of exactly 10 question objects.
+          content: `You are a trivia question generator. You must ALWAYS respond with a valid JSON array of exactly ${QUESTIONS_PER_GAME} question objects.
 Each object MUST have exactly two fields: "question" and "answer".
 Example format:
 [
@@ -53,7 +55,7 @@ Example format:
         },
         {
           role: "user",
-          content: `Generate 10 trivia questions about these topics: ${topics.join(", ")}. 
+          content: `Generate ${QUESTIONS_PER_GAME} trivia questions about these topics: ${topics.join(", ")}. 
 Remember to ONLY respond with the JSON array, no other text.`
         }
       ],
@@ -67,7 +69,7 @@ Remember to ONLY respond with the JSON array, no other text.`
 
     try {
       const questions = JSON.parse(response.trim())
-      if (!Array.isArray(questions) || questions.length !== 10 || !questions.every(q => q.question && q.answer)) {
+      if (!Array.isArray(questions) || questions.length !== QUESTIONS_PER_GAME || !questions.every(q => q.question && q.answer)) {
         throw new Error("Invalid question format received from OpenAI")
       }
       globalForQuestions.lobbyQuestions[lobbyCode] = questions
