@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { openai } from "@ai-sdk/openai"
 import { generateText } from "ai"
-import { QUESTIONS_PER_GAME } from "../start-game/route"
+import { QUESTIONS_PER_GAME } from "../../utils/game-state"
 
 export async function POST(req: NextRequest) {
   const { topics } = await req.json()

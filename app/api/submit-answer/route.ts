@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 import Pusher from "pusher"
-import { lobbyPlayers } from "../get-players/route"  // Import the players list
-import { getQuestions } from "../start-game/route"  // Import the questions getter
+import { getQuestions, getPlayers } from "../../utils/game-state"
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,

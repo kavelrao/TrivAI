@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getQuestions } from "../start-game/route"
+import { getQuestions } from "../../utils/game-state"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)

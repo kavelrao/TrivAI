@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { nanoid } from "nanoid"
 import Pusher from "pusher"
-import { addPlayer } from "../get-players/route"
+import { addPlayer } from "../../utils/game-state"
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,

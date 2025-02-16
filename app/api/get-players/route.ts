@@ -1,7 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-
-// In a real app, this would be stored in a database
-export const lobbyPlayers: Record<string, string[]> = {}
+import { getPlayers } from "../../utils/game-state"
 
 export function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -11,13 +9,5 @@ export function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing lobby code" }, { status: 400 })
   }
 
-  return NextResponse.json({ players: lobbyPlayers[lobbyCode] || [] })
-}
-
-// This is a helper function that other routes can use to add players
-export function addPlayer(lobbyCode: string, playerName: string) {
-  if (!lobbyPlayers[lobbyCode]) {
-    lobbyPlayers[lobbyCode] = []
-  }
-  lobbyPlayers[lobbyCode].push(playerName)
+  return NextResponse.json({ players: getPlayers(lobbyCode) })
 } 

@@ -1,9 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Pusher from "pusher"
-import { getTopics } from "../add-topic/route"
+import { getTopics, QUESTIONS_PER_GAME } from "../../utils/game-state"
 import OpenAI from "openai"
-
-export const QUESTIONS_PER_GAME = 5
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
@@ -88,13 +86,6 @@ Remember to ONLY respond with the JSON array, no other text.`
     }
     return NextResponse.json({ error: "An unknown error occurred" }, { status: 500 })
   }
-}
-
-// Helper function to get questions for a lobby
-export function getQuestions(lobbyCode: string) {
-  const questions = globalForQuestions.lobbyQuestions[lobbyCode] || []
-  console.log("Getting questions for lobby:", lobbyCode, "Questions:", questions)
-  return questions
 }
 
 

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Pusher from "pusher"
+import { getTopics, addTopic } from "../../utils/game-state"
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
@@ -27,20 +28,18 @@ export function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing lobby code" }, { status: 400 })
   }
 
-  console.log("GET topics for lobby:", lobbyCode, "Topics:", globalForTopics.lobbyTopics[lobbyCode] || [])
-  return NextResponse.json({ topics: globalForTopics.lobbyTopics[lobbyCode] || [] })
+  const topics = getTopicsForLobby(lobbyCode)
+  console.log("GET topics for lobby:", lobbyCode, "Topics:", topics)
+  return NextResponse.json({ topics })
 }
 
 export async function POST(req: NextRequest) {
   const { lobbyCode, topic } = await req.json()
   console.log("Adding topic to lobby:", lobbyCode, "Topic:", topic)
 
-  // Add the topic to our tracking
-  if (!globalForTopics.lobbyTopics[lobbyCode]) {
-    globalForTopics.lobbyTopics[lobbyCode] = []
-  }
-  globalForTopics.lobbyTopics[lobbyCode].push(topic)
-  console.log("Updated topics for lobby:", lobbyCode, "Topics:", globalForTopics.lobbyTopics[lobbyCode])
+  addTopic(lobbyCode, topic)
+  const topics = getTopicsForLobby(lobbyCode)
+  console.log("Updated topics for lobby:", lobbyCode, "Topics:", topics)
 
   await pusher.trigger(`lobby-${lobbyCode}`, "topic-added", {
     topic,
@@ -50,7 +49,7 @@ export async function POST(req: NextRequest) {
 }
 
 // Helper function to get topics for a lobby
-export function getTopics(lobbyCode: string): string[] {
+function getTopicsForLobby(lobbyCode: string): string[] {
   console.log("getTopics helper called for lobby:", lobbyCode, "Topics:", globalForTopics.lobbyTopics[lobbyCode] || [])
   return globalForTopics.lobbyTopics[lobbyCode] || []
 }
