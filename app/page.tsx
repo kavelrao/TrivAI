@@ -28,7 +28,7 @@ export default function Home() {
             </h1>
           </div>
           <p className="text-2xl font-medium text-purple-800 mt-4">
-            Where AI Makes Trivia Awesome!
+            Get quizzed on your favorite topics
           </p>
         </div>
 

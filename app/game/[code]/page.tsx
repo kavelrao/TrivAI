@@ -206,6 +206,9 @@ export default function Game({ params }: { params: { code: string } }) {
           <h2 className="text-2xl font-bold mb-4">Question {currentQuestion + 1}:</h2>
           <p className="text-xl mb-4">{currentQuestionText}</p>
           <p className="text-2xl mb-4">
+            Your Answer: <span className={`font-bold ${answer.toLowerCase() === correctAnswer.toLowerCase() ? 'text-green-600' : 'text-red-600'}`}>{answer}</span>
+          </p>
+          <p className="text-2xl mb-4">
             Correct Answer: <span className="font-bold text-green-600">{correctAnswer}</span>
           </p>
           <p className="text-lg text-gray-600 mb-4">
